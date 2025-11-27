@@ -1,10 +1,13 @@
-﻿using GameBackend.API.Data;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using BCrypt.Net;
+using GameBackend.API.Data;
+using GameBackend.API.DTO;
 using GameBackend.API.Models;
-using GameBackend.API.Helpers;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 
 namespace GameBackend.API.Controllers
 {
@@ -14,42 +17,60 @@ namespace GameBackend.API.Controllers
     {
         private readonly AppDbContext _db;
         private readonly IConfiguration _config;
-        private readonly IPasswordHasher<User> _hasher;
 
-        public LoginController(AppDbContext db, IConfiguration config, IPasswordHasher<User> hasher)
+        public LoginController(AppDbContext db, IConfiguration config)
         {
             _db = db;
             _config = config;
-            _hasher = hasher;
         }
 
+        // Kullanıcı yoksa kayıt + token
+        // Varsa şifre doğrula + token
         [HttpPost]
         public async Task<IActionResult> Login(LoginDto req)
         {
             var user = await _db.Users.FirstOrDefaultAsync(x => x.Username == req.Username);
 
+            // Yeni kullanıcı -> kayıt
             if (user == null)
             {
-                user = new User
-                {
-                    Username = req.Username,
-                    PasswordHash = _hasher.HashPassword(null!, req.Password)
-                };
+                var hashed = BCrypt.Net.BCrypt.HashPassword(req.Password);
+                user = new User { Username = req.Username, PasswordHash = hashed };
                 _db.Users.Add(user);
                 await _db.SaveChangesAsync();
             }
             else
             {
-                var res = _hasher.VerifyHashedPassword(user, user.PasswordHash, req.Password);
-                if (res == PasswordVerificationResult.Failed)
+                // var olan kullanıcı -> password doğrulama
+                if (!BCrypt.Net.BCrypt.Verify(req.Password, user.PasswordHash))
                     return BadRequest("Invalid credentials");
             }
 
-            var secret = _config["Jwt:Key"];
-
-            string token = JwtGenerator.Generate(user.Username, secret!, 60);
-
+            var token = GenerateJwt(user);
             return Ok(new { token });
+        }
+
+        private string GenerateJwt(User user)
+        {
+            var jwt = _config.GetSection("Jwt");
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt["Key"]!));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var claims = new[]
+            {
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Name, user.Username)
+        };
+
+            var token = new JwtSecurityToken(
+                issuer: jwt["Issuer"],
+                audience: jwt["Audience"],
+                claims: claims,
+                expires: DateTime.UtcNow.AddMinutes(double.Parse(jwt["ExpiresInMinutes"]!)),
+                signingCredentials: creds
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
 }
