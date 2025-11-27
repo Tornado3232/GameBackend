@@ -8,5 +8,6 @@ namespace GameBackend.API.Data
         public AppDbContext(DbContextOptions<AppDbContext> opt) : base(opt) { }
 
         public DbSet<User> Users => Set<User>();
+        public DbSet<Event> Events => Set<Event>();
     }
 }
