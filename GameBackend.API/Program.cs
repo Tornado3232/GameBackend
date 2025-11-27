@@ -1,30 +1,29 @@
-using System.Text;
-using GameBackend.API.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using GameBackend.API.Models;
-using Microsoft.AspNetCore.Identity;
+using System.Text;
+using GameBackend.API.Data;
+using GameBackend.API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//SQL Server connection
-builder.Services.AddDbContext<AppDbContext>(opt =>
-    opt.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
+// DB Config
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-//JWT
+// JWT
 var jwt = builder.Configuration.GetSection("Jwt");
-var key = Encoding.UTF8.GetBytes(jwt["Key"]);
+var key = Encoding.UTF8.GetBytes(jwt["Key"]!);
 
-builder.Services
-    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(opt =>
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
     {
-        opt.TokenValidationParameters = new TokenValidationParameters
+        options.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidateIssuerSigningKey = true,
             ValidateIssuer = true,
             ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
             ValidIssuer = jwt["Issuer"],
             ValidAudience = jwt["Audience"],
             IssuerSigningKey = new SymmetricSecurityKey(key)
@@ -32,12 +31,8 @@ builder.Services
     });
 
 builder.Services.AddAuthorization();
-
-// Add services to the container.
-builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
-
+builder.Services.AddScoped<JwtService>();
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
