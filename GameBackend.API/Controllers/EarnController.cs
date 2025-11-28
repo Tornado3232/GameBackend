@@ -19,9 +19,26 @@ namespace GameBackend.API.Controllers
         }
 
         [HttpPost("earn")]
-        public async Task<IActionResult> Earn(EarnDto req)
+        public async Task<IActionResult> Earn([FromBody] EarnDto req)
         {
-            //Call UpdateBalance Service, Call AddEvent Service
+            var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == req.UserId);
+            if (user == null)
+                return NotFound("User not found");
+
+            user.Balance += req.Amount;
+
+            var eventModel = new Event
+            {
+                UserId = req.UserId,
+                EventType = "earn",
+                Meta = req.Reason,
+                TsUtc = DateTime.UtcNow
+            };
+
+            _db.Events.Add(eventModel);
+            await _db.SaveChangesAsync();
+
+            return Ok(new { user.Id, user.Username, user.Balance });
             return Ok();
         }
     }

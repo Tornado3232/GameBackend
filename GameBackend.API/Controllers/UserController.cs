@@ -18,20 +18,27 @@ namespace GameBackend.API.Controllers
             _db = db;
         }
 
-        [HttpGet("getBalance")]
-        public async Task<IActionResult> GetBalance(UserDto req)
+        [HttpGet("users/{userId}")]
+        public async Task<IActionResult> GetBalance([FromRoute] int userId)
         {
-            var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == req.UserId);
+            var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
             if (user == null)
                 return Unauthorized("Invalid User");
 
-            return Ok(user);
+            return Ok(user.Balance);
         }
 
         [HttpPut("updateBalance")]
-        public async Task<IActionResult> UpdateBalance(UserDto req)
+        public async Task<IActionResult> UpdateBalance([FromBody] UserDto req)
         {
-            return Ok();
+            var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == req.UserId);
+            if (user == null)
+                return NotFound("User not found");
+
+            user.Balance += req.Balance;  
+            await _db.SaveChangesAsync();
+
+            return Ok(new { user.Id, user.Username, user.Balance });
         }
     }
 }

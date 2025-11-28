@@ -1,4 +1,4 @@
 ﻿namespace GameBackend.API.DTO
 {
-    public record UserDto(int UserId);
+    public record UserDto(int UserId, int Balance);
 }

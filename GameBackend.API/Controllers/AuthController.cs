@@ -22,7 +22,7 @@ namespace GameBackend.API.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register(RegisterDto req)
+        public async Task<IActionResult> Register([FromBody] RegisterDto req)
         {
             if (await _db.Users.AnyAsync(u => u.Username == req.Username))
                 return BadRequest("User already exists.");
@@ -43,7 +43,7 @@ namespace GameBackend.API.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login(LoginDto req)
+        public async Task<IActionResult> Login([FromBody] LoginDto req)
         {
             var user = await _db.Users.FirstOrDefaultAsync(u => u.Username == req.Username);
             if (user == null)

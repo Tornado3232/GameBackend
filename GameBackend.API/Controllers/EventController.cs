@@ -21,7 +21,7 @@ namespace GameBackend.API.Controllers
         }
 
         [HttpPost("create")]
-        public async Task<IActionResult> AddEvent(EventDto req)
+        public async Task<IActionResult> AddEvent([FromBody] EventDto req)
         {
             var eventArbitrary = new Event
             {
@@ -38,17 +38,25 @@ namespace GameBackend.API.Controllers
         }
 
         [HttpGet("events")]
-        public async Task<IActionResult> GetEvents(EventDto req)
+        public async Task<ActionResult<IEnumerable<Event>>> GetEvents()
         {
-            //Check if works??
-            return Ok();
+            var events = await _db.Events
+                .OrderByDescending(x => x.TsUtc)
+                .Take(100)
+                .ToListAsync();
+
+            return Ok(events);
         }
 
         [HttpGet("stats")]
-        public async Task<IActionResult> GetStats(EventDto req)
+        public async Task<ActionResult<Dictionary<string, int>>> GetStats()
         {
-            //Check if works??
-            return Ok();
+            var stats = await _db.Events
+            .GroupBy(e => e.EventType)
+            .Select(g => new { Type = g.Key, Count = g.Count() })
+            .ToDictionaryAsync(x => x.Type, x => x.Count);
+
+            return Ok(stats);
         }
     }
 }
