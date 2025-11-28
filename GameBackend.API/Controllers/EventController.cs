@@ -10,6 +10,7 @@ using System.Security.Claims;
 
 namespace GameBackend.API.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class EventController : ControllerBase
