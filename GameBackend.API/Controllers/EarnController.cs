@@ -39,7 +39,6 @@ namespace GameBackend.API.Controllers
             await _db.SaveChangesAsync();
 
             return Ok(new { user.Id, user.Username, user.Balance });
-            return Ok();
         }
     }
 }
