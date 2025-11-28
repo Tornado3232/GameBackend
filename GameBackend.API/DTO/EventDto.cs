@@ -1,4 +1,4 @@
 ﻿namespace GameBackend.API.DTO
 {
-    public record EventDto(string EventType, string Meta, DateTime TsUtc);
+    public record EventDto(int UserId, string EventType, string Meta, DateTime TsUtc);
 }

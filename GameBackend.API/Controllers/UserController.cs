@@ -3,13 +3,13 @@ using GameBackend.API.DTO;
 using GameBackend.API.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace GameBackend.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
     public class UserController : ControllerBase
     {
         private readonly AppDbContext _db;
@@ -21,7 +21,11 @@ namespace GameBackend.API.Controllers
         [HttpGet("getBalance")]
         public async Task<IActionResult> GetBalance(UserDto req)
         {
-            return Ok();
+            var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == req.UserId);
+            if (user == null)
+                return Unauthorized("Invalid User");
+
+            return Ok(user);
         }
 
         [HttpPut("updateBalance")]

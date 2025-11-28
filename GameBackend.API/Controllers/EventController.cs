@@ -4,14 +4,14 @@ using GameBackend.API.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Security.Claims;
 
 namespace GameBackend.API.Controllers
 {
-    
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
     public class EventController : ControllerBase
     {
         private readonly AppDbContext _db;
@@ -20,58 +20,35 @@ namespace GameBackend.API.Controllers
             _db = db;
         }
 
-        [HttpPost("event")]
+        [HttpPost("create")]
         public async Task<IActionResult> AddEvent(EventDto req)
         {
-            //Check if works??
-            var eventModel = new Event
+            var eventArbitrary = new Event
             {
-                UserId = Int32.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value),
+                UserId = req.UserId,
                 EventType = req.EventType,
-                TsUtc = req.TsUtc,
-                Meta = req.Meta
+                Meta = req.Meta,
+                TsUtc = req.TsUtc
             };
 
-            _db.Events.Add(eventModel);
+            _db.Events.Add(eventArbitrary);
             await _db.SaveChangesAsync();
 
-            return Ok("Event Created Succesfully");
+            return Ok(eventArbitrary);
         }
 
         [HttpGet("events")]
         public async Task<IActionResult> GetEvents(EventDto req)
         {
             //Check if works??
-            var eventModel = new Event
-            {
-                UserId = Int32.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value),
-                EventType = req.EventType,
-                TsUtc = req.TsUtc,
-                Meta = req.Meta
-            };
-
-            _db.Events.Add(eventModel);
-            await _db.SaveChangesAsync();
-
-            return Ok("Event Created Succesfully");
+            return Ok();
         }
 
         [HttpGet("stats")]
         public async Task<IActionResult> GetStats(EventDto req)
         {
             //Check if works??
-            var eventModel = new Event
-            {
-                UserId = Int32.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value),
-                EventType = req.EventType,
-                TsUtc = req.TsUtc,
-                Meta = req.Meta
-            };
-
-            _db.Events.Add(eventModel);
-            await _db.SaveChangesAsync();
-
-            return Ok("Event Created Succesfully");
+            return Ok();
         }
     }
 }

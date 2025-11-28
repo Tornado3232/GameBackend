@@ -24,31 +24,35 @@ namespace GameBackend.API.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterDto req)
         {
-            bool exists = await _db.Users.AnyAsync(x => x.Username == req.Username);
-            if (exists) return BadRequest("Username is already in use");
+            if (await _db.Users.AnyAsync(u => u.Username == req.Username))
+                return BadRequest("User already exists.");
+
+            _jwt.CreatePasswordHash(req.Password, out byte[] passwordHash, out byte[] passwordSalt);
 
             var user = new User
             {
                 Username = req.Username,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(req.Password)
+                PasswordHash = passwordHash,
+                PasswordSalt = passwordSalt
             };
 
             _db.Users.Add(user);
             await _db.SaveChangesAsync();
 
-            return Ok("User registered");
+            return Ok(user);
         }
 
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginDto req)
         {
-            var user = await _db.Users.FirstOrDefaultAsync(x => x.Username == req.Username);
-            if (user is null) return BadRequest("Invalid username");
+            var user = await _db.Users.FirstOrDefaultAsync(u => u.Username == req.Username);
+            if (user == null)
+                return Unauthorized("Invalid Username or Password.");
 
-            bool valid = BCrypt.Net.BCrypt.Verify(req.Password, user.PasswordHash);
-            if (!valid) return BadRequest("Invalid password");
+            if (!_jwt.VerifyPasswordHash(req.Password, user.PasswordHash, user.PasswordSalt))
+                return Unauthorized("Invalid Username or Password.");
 
-            string token = _jwt.GenerateToken(user);
+            var token = _jwt.GenerateToken(user);
             return Ok(new { token });
         }
     }

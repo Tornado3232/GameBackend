@@ -10,7 +10,6 @@ namespace GameBackend.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
     public class EarnController : ControllerBase
     {
         private readonly AppDbContext _db;
