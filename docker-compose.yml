@@ -1,0 +1,13 @@
+
+version: "3.8"
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./reports:/app/reports
+      - ./data:/app/data
+    environment:
+      - JWT_SECRET=test_secret
+      - JWT_TTL_MIN=120

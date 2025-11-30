@@ -21,26 +21,44 @@ var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSetting
 
 builder.Services.AddScoped<JwtService>();
 
-builder.Services.AddAuthentication(options =>
+//builder.Services.AddAuthentication(options =>
+//    {
+//        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+//        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+//    })
+//    .AddJwtBearer(options =>
+//    {
+
+//        options.TokenValidationParameters = new TokenValidationParameters
+//        {
+//            ValidateIssuerSigningKey = true,
+//            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Key)),
+//            ValidateIssuer = true,
+//            ValidIssuer = jwtSettings.Issuer,
+//            ValidateAudience = true,
+//            ValidAudience = jwtSettings.Audience,
+//            ValidateLifetime = true,
+//            ClockSkew = TimeSpan.Zero
+//        };
+//    });
+
+builder.Services.AddAuthentication()
+.AddJwtBearer("Bearer", jwtOptions =>
+{
+    jwtOptions.RequireHttpsMetadata = false;
+    jwtOptions.Authority = builder.Configuration["Api:Authority"];
+    jwtOptions.Audience = builder.Configuration["Api:Audience"];
+    jwtOptions.TokenValidationParameters = new TokenValidationParameters
     {
-        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    })
-    .AddJwtBearer(options =>
-    {
-        
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Key)),
-            ValidateIssuer = true,
-            ValidIssuer = jwtSettings.Issuer,
-            ValidateAudience = true,
-            ValidAudience = jwtSettings.Audience,
-            ValidateLifetime = true,
-            ClockSkew = TimeSpan.Zero
-        };
-    });
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateIssuerSigningKey = true,
+        ValidAudiences = builder.Configuration.GetSection("Api:ValidAudiences").Get<string[]>(),
+        ValidIssuers = builder.Configuration.GetSection("Api:ValidIssuers").Get<string[]>()
+    };
+
+    jwtOptions.MapInboundClaims = false;
+});
 
 builder.Services.AddAuthorization();
 builder.Services.AddScoped<JwtService>();

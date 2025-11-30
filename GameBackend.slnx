@@ -1,3 +1,6 @@
 <Solution>
   <Project Path="GameBackend.API/GameBackend.API.csproj" />
+  <Project Path="GameData/GameData.pyproj" Type="888888a0-9f3d-457c-b088-3a5042f75d52" Id="f0aae2fd-81a4-40e0-a393-da179c8c2a1b">
+    <Build Project="false" />
+  </Project>
 </Solution>

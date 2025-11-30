@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GameBackend.API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251128110914_InitialMigration")]
-    partial class InitialMigration
+    [Migration("20251130023234_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
