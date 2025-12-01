@@ -89,7 +89,7 @@ GameBackend/
 3.1 Start all services
 
 ```bash
-docker compose up --build
+docker compose up
 ```
 
 3.2 Services
