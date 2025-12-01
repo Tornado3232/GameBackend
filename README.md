@@ -1,29 +1,23 @@
 ﻿Backend & Data Engineering Assignment
 (.NET 10 + Python 3.13 • Docker Compose)
 
-This repository implements the Backend & Data Engineering technical assignment using .NET 10 for the core game backend API and Python 3.13 for the data-processing tasks. The entire system runs using Docker Compose, following the requirements defined in the project brief.
+This repository implements the Backend & Data Engineering technical assignment using .NET 10 for the game backend API and Python 3.13 for the data reliability tasks. 
+The entire system runs using Docker Compose, following the requirements defined in the project brief.
 
 Project Overview
 
-The system consists of two main components:
-
 1. Core Game Backend API (.NET 10)
 
-Simulates a lightweight game backend similar to PlayFab/Azure environments.
-
-Supports:
-
-Endpoint	Description
-POST /login	Register a user & return JWT
-POST /earn	Increase user balance + write event
-POST /event	Store arbitrary events
-GET /balance	Return user balance
-GET /events	List last 100 events
-GET /stats	Count events per type
-GET /track?character=<ID>	Capture deep-link parameter
-
-All timestamps are stored in UTC.
-
+| Endpoint               | Description                          |
+| ---------------------- | ------------------------------------ |
+| POST /register         | Register a user                      |
+| POST /login	         | User login & return JWT              |
+| POST /earn	         | Increase user balance + write event  |
+| POST /event	         | Store arbitrary events               |
+| GET /balance	         | Return user balance                  |
+| GET /events	         | List last 100 events                 |
+| GET /stats	         | Count events per type                |
+	
 2. Data Engineering Tasks (Python 3.13)
 
 Python scripts process mock datasets (CSV files) and perform analytical tasks:
@@ -54,31 +48,31 @@ Daily Active Users (DAU)
 
 Average Revenue Per Daily Active User (ARPDAU)
 
-✓ Deep-Link Parameter Flow
-
-The backend API exposes /track and Python scripts validate the flow for character=<ID>.
-
 Project Architecture
 
-root/
- ├─ backend/              # .NET 10 Web API
+GameBackend/
+ ├─ GameBackend.API/
  │   ├─ Controllers/
+ │   ├─ Data/
+ │   ├─ DTO/
+ │   ├─ Helpers/
+ │   ├─ Migrations/
  │   ├─ Models/
  │   ├─ Services/
- │   ├─ Data/
- │   └─ ...               
+ │   ├─ appsettings.json
+ │   ├─ DockerFile
+ │   └─ Program.cs
  │
- ├─ data_tasks/           # Python 3.13 data engineering scripts
- │   ├─ cleaning/
- │   ├─ reconciliation/
- │   ├─ reporting/
- │   ├─ anomaly_detection/
- │   └─ ...
- │
- ├─ sample_data/          # Provided CSV files
- │   ├─ confirmed_purchases.csv
- │   ├─ costs_daily.csv
- │   └─ sessions.csv
+ ├─ GameData/
+ │   ├─ Files/
+ │   |   ├─ confirmed_purchases.csv
+ │   │   ├─ costs_daily.csv
+ │   │   ├─ purchases.csv
+ │   │   └─ sessions.csv
+ │   │
+ |   ├─ DockerFile
+ │   ├─ GameData.py
+ │   └─ requirements.txt
  │
  ├─ docker-compose.yml
  └─ README.md
@@ -94,19 +88,10 @@ docker compose up --build
 
 | Service                | URL                               |
 | ---------------------- | --------------------------------- |
-| Backend API (.NET 10)  | `http://localhost:5000`           |
+| Backend API (.NET 10)  | `http://localhost:7239`           |
 | Python Worker          | Runs automatically via entrypoint |
-| Database (if included) | ⚠️ EDIT ME                        |
+| Database (if included) | Sql Server(Runs on Backend Server)|
 
-
-Authentication (JWT)
-
-POST /login returns a JWT token.
-Use it in subsequent requests:
-
-Authorization: Bearer <token>
-
-The backend uses a lightweight JWT issuer for simulation purposes.
 
 Data Model
 
@@ -132,8 +117,18 @@ public class Event
         public string? Meta { get; set; }
     }
 
+Data Transfer Objects (DTOs)
 
+    public record RegisterDto(string Username, string Password);
+    public record LoginDto(string Username, string Password);
+    public record UserDto(int UserId, int Balance);
+    public record EventDto(int UserId, string EventType, string Meta, DateTime TsUtc);
+    public record EarnDto(int UserId, int Amount, string Reason);
+    
 Outputs Produced by Python Scripts
+
+All outputs are stored under:
+/GameBackend/GameData/Reports/
 
 | Task              | Output                     |
 | ----------------- | -------------------------- |
@@ -142,8 +137,4 @@ Outputs Produced by Python Scripts
 | ROAS              | `roas_d1.json`             |
 | Anomaly Detection | `roas_anomaly.json`        |
 | ARPDAU            | `arpdau_d1.json`           |
-
-
-All outputs are stored under:
-/GameBackend/GameData/Reports/
 
