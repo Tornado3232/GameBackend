@@ -52,6 +52,7 @@ Python scripts process mock datasets (CSV files) and perform analytical tasks:
 
 The following is the full hierarchical directory structure:
 
+```bash
 GameBackend/
 ├─ GameBackend.API/
 │  ├─ Controllers/
@@ -78,6 +79,7 @@ GameBackend/
 │
 ├─ docker-compose.yml
 └─ README.md
+```
 
 
 ------------------------------------------------------------
@@ -104,6 +106,7 @@ Database               | SQL Server (runs inside API image)
 
 4.1 User Model
 
+```bash
 public class User
 {
     public int Id { get; set; }
@@ -112,9 +115,11 @@ public class User
     public byte[] PasswordSalt { get; set; }
     public int Balance { get; set; } = 0;
 }
+```
 
 4.2 Event Model
 
+```bash
 public class Event
 {
     public int Id { get; set; }
@@ -123,18 +128,19 @@ public class Event
     public DateTime TsUtc { get; set; }
     public string? Meta { get; set; }
 }
-
+```
 
 ------------------------------------------------------------
 5. Data Transfer Objects (DTOs)
 ------------------------------------------------------------
 
+```bash
 public record RegisterDto(string Username, string Password);
 public record LoginDto(string Username, string Password);
 public record UserDto(int UserId, int Balance);
 public record EventDto(int UserId, string EventType, string Meta, DateTime TsUtc);
 public record EarnDto(int UserId, int Amount, string Reason);
-
+```
 
 ------------------------------------------------------------
 6. Outputs Produced by Python Scripts
