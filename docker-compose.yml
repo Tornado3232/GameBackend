@@ -1,13 +1,26 @@
+version: "3.9"
 
-version: "3.8"
 services:
-  api:
-    build: .
+  webapi:
+    build:
+      context: ./GameBackend.API
+      dockerfile: Dockerfile
+    container_name: game_backend_api
     ports:
-      - "8000:8000"
-    volumes:
-      - ./reports:/app/reports
-      - ./data:/app/data
+      - "7239:8080"
     environment:
-      - JWT_SECRET=test_secret
-      - JWT_TTL_MIN=120
+      - ASPNETCORE_ENVIRONMENT=Development
+    volumes:
+      - dp_keys:/root/.aspnet/DataProtection-Keys
+
+  pythonapp:
+    build:
+      context: ./GameData
+      dockerfile: Dockerfile
+    container_name: game_data
+    volumes:
+      - ./GameData/Files:/app/Files
+      - ./GameData/Reports:/app/Reports
+
+volumes:
+  dp_keys:

@@ -3,65 +3,44 @@ using GameBackend.API.Helpers;
 using GameBackend.API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using Microsoft.OpenApi;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // DB Config
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
+        sql => sql.EnableRetryOnFailure()) // Enable transient error resiliency
+);
 
-//JWT Config
-builder.Services.Configure<JwtSettings>(
-    builder.Configuration.GetSection("JwtSettings"));
+// JWT Config
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
-
 builder.Services.AddScoped<JwtService>();
 
-//builder.Services.AddAuthentication(options =>
-//    {
-//        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-//        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-//    })
-//    .AddJwtBearer(options =>
-//    {
-
-//        options.TokenValidationParameters = new TokenValidationParameters
-//        {
-//            ValidateIssuerSigningKey = true,
-//            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Key)),
-//            ValidateIssuer = true,
-//            ValidIssuer = jwtSettings.Issuer,
-//            ValidateAudience = true,
-//            ValidAudience = jwtSettings.Audience,
-//            ValidateLifetime = true,
-//            ClockSkew = TimeSpan.Zero
-//        };
-//    });
-
-builder.Services.AddAuthentication()
-.AddJwtBearer("Bearer", jwtOptions =>
+builder.Services.AddAuthentication(options =>
 {
-    jwtOptions.RequireHttpsMetadata = false;
-    jwtOptions.Authority = builder.Configuration["Api:Authority"];
-    jwtOptions.Audience = builder.Configuration["Api:Audience"];
-    jwtOptions.TokenValidationParameters = new TokenValidationParameters
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidateIssuer = true,
-        ValidateAudience = true,
         ValidateIssuerSigningKey = true,
-        ValidAudiences = builder.Configuration.GetSection("Api:ValidAudiences").Get<string[]>(),
-        ValidIssuers = builder.Configuration.GetSection("Api:ValidIssuers").Get<string[]>()
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Key)),
+        ValidateIssuer = true,
+        ValidIssuer = jwtSettings.Issuer,
+        ValidateAudience = true,
+        ValidAudience = jwtSettings.Audience,
+        ValidateLifetime = true,
+        ClockSkew = TimeSpan.Zero
     };
-
-    jwtOptions.MapInboundClaims = false;
 });
 
 builder.Services.AddAuthorization();
-builder.Services.AddScoped<JwtService>();
 builder.Services.AddControllers();
 
 builder.Services.AddSwaggerGen(c =>
@@ -89,19 +68,32 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-
-builder.Services.AddOpenApi();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Middleware
+app.UseCors("AllowAll");
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Game Backend API v1");
+        c.RoutePrefix = string.Empty; // Swagger at root
+    });
 }
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();  // Keep disabled for Docker
 
 app.UseAuthentication();
 app.UseAuthorization();

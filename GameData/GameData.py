@@ -2,9 +2,8 @@
 from datetime import datetime, timedelta
 import pandas as pd
 
-BASE = os.path.dirname(os.path.dirname(__file__))
-PROJECT = os.path.join(BASE,"GameData")
-DATA = os.path.join(PROJECT, "Files")
+BASE = os.path.dirname(os.path.abspath(__file__))
+DATA = os.path.join(BASE, "Files")
 REPORTS = os.path.join(BASE, "Reports")
 os.makedirs(REPORTS, exist_ok=True)
 
