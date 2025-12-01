@@ -31,6 +31,7 @@ Python scripts process mock datasets (CSV files) and perform analytical tasks:
 
 - Reconciliation (±10 min)  
   Join purchases_raw with confirmed_purchases.csv and classify entries:
+
     • matched  
     • af_only  
     • confirmed_only
@@ -40,6 +41,7 @@ Python scripts process mock datasets (CSV files) and perform analytical tasks:
 
 - ARPDAU Calculation (D-1)  
   Compute:
+
     • Daily Active Users (DAU)  
     • Average Revenue Per Daily Active User (ARPDAU)
 
