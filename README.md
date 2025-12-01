@@ -11,16 +11,16 @@ The entire system runs using Docker Compose, following the requirements defined 
 
 1.1 Core Game Backend API (.NET 10)
 
-Endpoint            | Description
---------------------|----------------------------------------
-POST /register      | Register a user
-POST /login         | User login and return JWT
-POST /earn          | Increase user balance and write event
-POST /event         | Store arbitrary events
-GET /balance        | Return user balance
-GET /events         | List last 100 events
-GET /stats          | Count events per type
-
+Endpoint                 | Description
+-------------------------|----------------------------------------
+POST /auth/register      | Register a user
+POST /auth/login         | User login and return JWT
+POST /earn/earn          | Increase user balance and write event
+POST /event/create       | Create events
+GET /event/events        | List last 100 events
+GET /event/stats         | Count events per type
+GET /user/users/{userId} | Return user balance
+PUT /user/updateBalance  | Update user balance
 
 1.2 Data Engineering Tasks (Python 3.13)
 
