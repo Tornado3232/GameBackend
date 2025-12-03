@@ -137,4 +137,3 @@ All outputs are stored under:
 | ROAS              | `roas_d1.json`             |
 | Anomaly Detection | `roas_anomaly.json`        |
 | ARPDAU            | `arpdau_d1.json`           |
-

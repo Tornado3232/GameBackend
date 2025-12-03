@@ -17,8 +17,13 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 // JWT Config
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
+builder.Services.Configure<AppsFlyerSettings>(builder.Configuration.GetSection("AppsFlyerSettings"));
+
+
 var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
+var appsFlyerSettings = builder.Configuration.GetSection("AppsFlyerSettings").Get<AppsFlyerSettings>();
 builder.Services.AddScoped<JwtService>();
+builder.Services.AddScoped<AppsFlyerService>();
 
 builder.Services.AddAuthentication(options =>
 {
@@ -36,7 +41,15 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidAudience = jwtSettings.Audience,
         ValidateLifetime = true,
-        ClockSkew = TimeSpan.Zero
+        ClockSkew = TimeSpan.FromMinutes(190)
+    };
+    options.Events = new JwtBearerEvents
+    {
+        OnAuthenticationFailed = context =>
+        {
+            Console.WriteLine("JWT ERROR: " + context.Exception.Message);
+            return Task.CompletedTask;
+        }
     };
 });
 
