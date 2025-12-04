@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-
-namespace GameBackend.API.Models
+﻿namespace GameBackend.API.Models
 {
     public class Event
     {

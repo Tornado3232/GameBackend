@@ -1,5 +1,6 @@
 ﻿using GameBackend.API.Data;
 using GameBackend.API.Helpers;
+using GameBackend.API.Models;
 using GameBackend.API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -24,13 +25,11 @@ namespace GameBackend.API.Controllers
         [HttpPost("postback")]
         public async Task<IActionResult> Postback()
         {
-            // 1. Read signature header
             if (!Request.Headers.TryGetValue("af-signature", out var signatureHeader))
                 return BadRequest("Missing af-signature header");
 
             string receivedSignature = signatureHeader.ToString();
 
-            // 2. Read raw body (AppsFlyer requires exact body for hashing)
             Request.EnableBuffering();
             Request.Body.Position = 0;
 
@@ -40,16 +39,21 @@ namespace GameBackend.API.Controllers
 
             Request.Body.Position = 0;
 
-            // 3. Validate signature using service
             bool isValid = _afService.VerifySignature(rawBody, receivedSignature);
 
             if (!isValid)
-                return Unauthorized(new { message = "Invalid signature" });
+                return Unauthorized(new { message = "Invalid signature or Body" });
 
-            // 4. Deserialize if needed (optional)
             var bodyObject = System.Text.Json.JsonSerializer.Deserialize<object>(rawBody);
 
-            // 5. Success
+            var appsFlyerPayload = new AppsFlyer
+            {
+                Payload = rawBody
+            };
+
+            _db.AppsFlyerPayloads.Add(appsFlyerPayload);
+            await _db.SaveChangesAsync();
+
             return Ok(new
             {
                 message = "Signature valid",
