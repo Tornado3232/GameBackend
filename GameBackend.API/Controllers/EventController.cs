@@ -4,6 +4,7 @@ using GameBackend.API.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace GameBackend.API.Controllers
 {
@@ -18,9 +19,39 @@ namespace GameBackend.API.Controllers
             _db = db;
         }
 
+        //[HttpPost("create")]
+        //public async Task<IActionResult> AddEvent([FromBody] EventDto req)
+        //{
+        //    var eventArbitrary = new Event
+        //    {
+        //        UserId = req.UserId,
+        //        EventType = req.EventType,
+        //        Meta = req.Meta,
+        //        TsUtc = req.TsUtc
+        //    };
+
+        //    _db.Events.Add(eventArbitrary);
+        //    await _db.SaveChangesAsync();
+
+        //    return Ok(eventArbitrary);
+        //}
+
         [HttpPost("create")]
         public async Task<IActionResult> AddEvent([FromBody] EventDto req)
         {
+            if (!Request.Headers.TryGetValue("Idempotency-Key", out var headerKey))
+                return BadRequest("Missing Idempotency-Key header.");
+
+            var key = headerKey.ToString();
+
+            var existingRecord = await _db.IdempotencyRecords
+                .FirstOrDefaultAsync(x => x.Key == key);
+
+            if (existingRecord != null)
+            {
+                return Content(existingRecord.ResponseBody, "application/json");
+            }
+
             var eventArbitrary = new Event
             {
                 UserId = req.UserId,
@@ -32,19 +63,47 @@ namespace GameBackend.API.Controllers
             _db.Events.Add(eventArbitrary);
             await _db.SaveChangesAsync();
 
+            var responseJson = JsonSerializer.Serialize(eventArbitrary);
+
+            var record = new IdempotencyRecord
+            {
+                Key = key,
+                ResponseBody = responseJson
+            };
+
+            _db.IdempotencyRecords.Add(record);
+            await _db.SaveChangesAsync();
+
             return Ok(eventArbitrary);
         }
 
+
         [HttpGet("events")]
-        public async Task<ActionResult<IEnumerable<Event>>> GetEvents()
+        public async Task<ActionResult<IEnumerable<Event>>> GetEvents([FromQuery] int page = 1, [FromQuery] int pageSize = 20)
         {
-            var events = await _db.Events
-                .OrderByDescending(x => x.TsUtc)
-                .Take(100)
+            if (page < 1 || pageSize < 1)
+                return BadRequest("page and pageSize must be positive.");
+
+            var query = _db.Events.OrderByDescending(x => x.TsUtc);
+
+            var totalCount = await query.CountAsync();
+
+            var events = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
 
-            return Ok(events);
+            var result = new
+            {
+                page,
+                pageSize,
+                totalCount,
+                data = events
+            };
+
+            return Ok(result);
         }
+
 
         [HttpGet("stats")]
         public async Task<ActionResult<Dictionary<string, int>>> GetStats()

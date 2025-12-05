@@ -10,5 +10,6 @@ namespace GameBackend.API.Data
         public DbSet<User> Users => Set<User>();
         public DbSet<Event> Events => Set<Event>();
         public DbSet<AppsFlyer> AppsFlyerPayloads => Set<AppsFlyer>();
+        public DbSet<IdempotencyRecord> IdempotencyRecords => Set<IdempotencyRecord>();
     }
 }
