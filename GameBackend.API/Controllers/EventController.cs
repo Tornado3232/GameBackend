@@ -19,28 +19,13 @@ namespace GameBackend.API.Controllers
             _db = db;
         }
 
-        //[HttpPost("create")]
-        //public async Task<IActionResult> AddEvent([FromBody] EventDto req)
-        //{
-        //    var eventArbitrary = new Event
-        //    {
-        //        UserId = req.UserId,
-        //        EventType = req.EventType,
-        //        Meta = req.Meta,
-        //        TsUtc = req.TsUtc
-        //    };
-
-        //    _db.Events.Add(eventArbitrary);
-        //    await _db.SaveChangesAsync();
-
-        //    return Ok(eventArbitrary);
-        //}
-
         [HttpPost("create")]
         public async Task<IActionResult> AddEvent([FromBody] EventDto req)
         {
             if (!Request.Headers.TryGetValue("Idempotency-Key", out var headerKey))
+            {
                 return BadRequest("Missing Idempotency-Key header.");
+            }
 
             var key = headerKey.ToString();
 
@@ -68,7 +53,7 @@ namespace GameBackend.API.Controllers
             var record = new IdempotencyRecord
             {
                 Key = key,
-                ResponseBody = responseJson
+                ResponseBody = responseJson,
             };
 
             _db.IdempotencyRecords.Add(record);
@@ -106,14 +91,26 @@ namespace GameBackend.API.Controllers
 
 
         [HttpGet("stats")]
-        public async Task<ActionResult<Dictionary<string, int>>> GetStats()
+        public async Task<ActionResult<Dictionary<string, int>>> GetStats([FromQuery] int? userId, [FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate)
         {
-            var stats = await _db.Events
-            .GroupBy(e => e.EventType)
-            .Select(g => new { Type = g.Key, Count = g.Count() })
-            .ToDictionaryAsync(x => x.Type, x => x.Count);
+            var query = _db.Events.AsQueryable();
+
+            if (userId.HasValue)
+                query = query.Where(e => e.UserId == userId.Value);
+
+            if (startDate.HasValue)
+                query = query.Where(e => e.TsUtc >= startDate.Value);
+
+            if (endDate.HasValue)
+                query = query.Where(e => e.TsUtc <= endDate.Value);
+
+            var stats = await query
+                .GroupBy(e => e.EventType)
+                .Select(g => new { Type = g.Key, Count = g.Count() })
+                .ToDictionaryAsync(x => x.Type, x => x.Count);
 
             return Ok(stats);
         }
+
     }
 }
