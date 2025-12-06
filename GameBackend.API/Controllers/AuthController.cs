@@ -1,4 +1,5 @@
 ﻿using BCrypt.Net;
+using GameBackend.API.Abstractions;
 using GameBackend.API.Data;
 using GameBackend.API.DTO;
 using GameBackend.API.Models;
@@ -13,9 +14,9 @@ namespace GameBackend.API.Controllers
     public class AuthController : ControllerBase
     {
         private readonly AppDbContext _db;
-        private readonly JwtService _jwt;
+        private readonly IJwtService _jwt;
 
-        public AuthController(AppDbContext db, JwtService jwt)
+        public AuthController(AppDbContext db, IJwtService jwt)
         {
             _db = db;
             _jwt = jwt;

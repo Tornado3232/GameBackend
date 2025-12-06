@@ -6,10 +6,11 @@ using System.Security.Claims;
 using System.Text;
 using GameBackend.API.Helpers;
 using System.Security.Cryptography;
+using GameBackend.API.Abstractions;
 
 namespace GameBackend.API.Services
 {
-    public class JwtService
+    public class JwtService : IJwtService
     {
         private readonly JwtSettings _jwtSettings;
 

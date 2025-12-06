@@ -1,3 +1,4 @@
+using GameBackend.API.Abstractions;
 using GameBackend.API.Data;
 using GameBackend.API.Helpers;
 using GameBackend.API.Services;
@@ -22,7 +23,7 @@ builder.Services.Configure<AppsFlyerSettings>(builder.Configuration.GetSection("
 
 var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
 var appsFlyerSettings = builder.Configuration.GetSection("AppsFlyerSettings").Get<AppsFlyerSettings>();
-builder.Services.AddScoped<JwtService>();
+builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<AppsFlyerService>();
 
 builder.Services.AddAuthentication(options =>
