@@ -17,7 +17,7 @@ namespace GameBackend.API.Controllers
             _db = db;
         }
 
-        [HttpGet("users/{userId}")]
+        [HttpGet("{userId}")]
         public async Task<IActionResult> GetBalance([FromRoute] int userId)
         {
             var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
@@ -27,7 +27,7 @@ namespace GameBackend.API.Controllers
             return Ok(user.Balance);
         }
 
-        [HttpPut("updateBalance")]
+        [HttpPut("update")]
         public async Task<IActionResult> UpdateBalance([FromBody] UserDto req)
         {
             var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == req.UserId);
