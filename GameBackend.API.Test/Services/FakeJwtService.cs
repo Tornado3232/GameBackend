@@ -1,8 +1,5 @@
 ﻿using GameBackend.API.Abstractions;
 using GameBackend.API.Models;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace GameBackend.API.Test.Services
 {

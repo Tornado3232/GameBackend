@@ -1,3 +1,4 @@
+using DotNetEnv;
 using GameBackend.API.Abstractions;
 using GameBackend.API.Data;
 using GameBackend.API.Helpers;
@@ -9,6 +10,8 @@ using Microsoft.OpenApi;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+
+Env.Load();
 
 // DB Config
 builder.Services.AddDbContext<AppDbContext>(options =>

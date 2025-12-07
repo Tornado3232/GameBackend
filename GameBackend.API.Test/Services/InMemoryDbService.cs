@@ -1,8 +1,5 @@
 ﻿using GameBackend.API.Data;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace GameBackend.API.Test.Services
 {

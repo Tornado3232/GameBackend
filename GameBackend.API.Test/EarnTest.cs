@@ -6,7 +6,6 @@ using GameBackend.API.Test.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Text.Json;
 
 namespace GameBackend.API.Test
 {
