@@ -263,6 +263,13 @@ ARPDAU              | arpdau_d1.json
 <img width="938" height="592" alt="AppsFlyer_Postback" src="https://github.com/user-attachments/assets/ae4833aa-6f0e-47a2-be60-817c4dd58a98" />
 
 
+------------------------------------------------------------
+8. API Test
+------------------------------------------------------------
+
+
+
+<img width="972" height="371" alt="Test_Explorer" src="https://github.com/user-attachments/assets/602b2e66-bb84-4913-bb01-a9a596020a9f" />
 
 
 
