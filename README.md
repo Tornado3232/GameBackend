@@ -19,8 +19,8 @@ POST /earn/earn          | Increase user balance and write event
 POST /event/create       | Create events
 GET /event/events        | List last 100 events
 GET /event/stats         | Count events per type
-GET /user/users/{userId} | Return user balance
-PUT /user/updateBalance  | Update user balance
+GET /user/{userId}       | Return user balance
+PUT /user/update         | Update user balance
 
 1.2 Data Engineering Tasks (Python 3.13)
 
@@ -53,8 +53,11 @@ Python scripts process mock datasets (CSV files) and perform analytical tasks:
 The following is the full hierarchical directory structure:
 
 ```bash
+
 GameBackend/
+│
 ├─ GameBackend.API/
+│  ├─ Abstractions/
 │  ├─ Controllers/
 │  ├─ Data/
 │  ├─ DTO/
@@ -62,9 +65,15 @@ GameBackend/
 │  ├─ Migrations/
 │  ├─ Models/
 │  ├─ Services/
+│  ├─ .env
 │  ├─ appsettings.json
 │  ├─ DockerFile
 │  └─ Program.cs
+│
+├─ GameBackend.API.Test/
+│  ├─ Services/
+│  ├─ AuthenticationTest.cs
+│  └─ EarnTest.cs
 │
 ├─ GameData/
 │  ├─ Files/
@@ -72,6 +81,13 @@ GameBackend/
 │  │  ├─ costs_daily.csv
 │  │  ├─ purchases.csv
 │  │  └─ sessions.csv
+│  │
+│  ├─ Reports/
+│  │  ├─ arpdau_d1.json
+│  │  ├─ purchases_curated.csv
+│  │  ├─ reconciliation.json
+│  │  ├─ roas_anomaly.json
+│  │  └─ roas_d1.json
 │  │
 │  ├─ DockerFile
 │  ├─ GameData.py
