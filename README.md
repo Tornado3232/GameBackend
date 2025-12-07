@@ -19,8 +19,8 @@ POST /earn/earn          | Increase user balance and write event
 POST /event/create       | Create events
 GET /event/events        | List last 100 events
 GET /event/stats         | Count events per type
-GET /user/users/{userId} | Return user balance
-PUT /user/updateBalance  | Update user balance
+GET /user/{userId}       | Return user balance
+PUT /user/update         | Update user balance
 
 1.2 Data Engineering Tasks (Python 3.13)
 
@@ -53,8 +53,11 @@ Python scripts process mock datasets (CSV files) and perform analytical tasks:
 The following is the full hierarchical directory structure:
 
 ```bash
+
 GameBackend/
+│
 ├─ GameBackend.API/
+│  ├─ Abstractions/
 │  ├─ Controllers/
 │  ├─ Data/
 │  ├─ DTO/
@@ -62,9 +65,15 @@ GameBackend/
 │  ├─ Migrations/
 │  ├─ Models/
 │  ├─ Services/
+│  ├─ .env
 │  ├─ appsettings.json
 │  ├─ DockerFile
 │  └─ Program.cs
+│
+├─ GameBackend.API.Test/
+│  ├─ Services/
+│  ├─ AuthenticationTest.cs
+│  └─ EarnTest.cs
 │
 ├─ GameData/
 │  ├─ Files/
@@ -72,6 +81,13 @@ GameBackend/
 │  │  ├─ costs_daily.csv
 │  │  ├─ purchases.csv
 │  │  └─ sessions.csv
+│  │
+│  ├─ Reports/
+│  │  ├─ arpdau_d1.json
+│  │  ├─ purchases_curated.csv
+│  │  ├─ reconciliation.json
+│  │  ├─ roas_anomaly.json
+│  │  └─ roas_d1.json
 │  │
 │  ├─ DockerFile
 │  ├─ GameData.py
@@ -131,6 +147,29 @@ public class Event
 }
 ```
 
+
+4.3 IdempotencyRecord Model
+
+```bash
+public class IdempotencyRecord
+{
+    public int Id { get; set; }
+    public string Key { get; set; }
+    public string ResponseBody { get; set; }
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+}
+```
+
+4.4 AppsFlyer Model
+
+```bash
+public class AppsFlyer
+{
+    public int Id { get; set; }
+    public string Payload { get; set; }
+}
+```
+
 ------------------------------------------------------------
 5. Data Transfer Objects (DTOs)
 ------------------------------------------------------------
@@ -157,3 +196,73 @@ Reconciliation      | reconciliation.json
 ROAS                | roas_d1.json
 Anomaly Detection   | roas_anomaly.json
 ARPDAU              | arpdau_d1.json
+
+------------------------------------------------------------
+7. API Full Flow
+------------------------------------------------------------
+
+                                                      7.1 User Register
+
+
+<img width="857" height="515" alt="Auth_Register" src="https://github.com/user-attachments/assets/7a859f3c-0c6e-4372-9eb7-09ceab6dfcef" />
+
+
+                                                        
+                                                        7.2 User Login
+
+                                                        
+<img width="857" height="496" alt="Auth_Login" src="https://github.com/user-attachments/assets/d934ea20-1717-4e29-a85d-18aff0e15c60" />
+
+
+
+                                                      7.3 Create an Event
+
+                                                      
+<img width="858" height="566" alt="Event_Create" src="https://github.com/user-attachments/assets/0a3dab9b-6591-4267-bf1e-60e41c2d0f59" />
+
+
+
+                                                        7.4 Get Events
+
+                                                        
+<img width="928" height="609" alt="Event_Get" src="https://github.com/user-attachments/assets/cb513360-342f-4f43-a826-f227e02495ec" />
+
+
+
+                                                        7.5 Get Stats
+
+                                                        
+<img width="937" height="419" alt="Event_Get_Stats" src="https://github.com/user-attachments/assets/018c9027-2a9f-44c6-a7c9-4e40e329116a" />
+
+
+
+                                                          7.6 Earn
+
+                                                          
+<img width="941" height="504" alt="Earn_Earn" src="https://github.com/user-attachments/assets/d2d7a555-38e3-49e3-a8db-211ad7ced4fc" />
+
+
+
+                                                    7.7 Get User's Balance
+
+                                                    
+<img width="942" height="325" alt="User_Get_Balance" src="https://github.com/user-attachments/assets/f6cf026c-f804-48b1-a179-9b1f1a36e025" />
+
+
+
+                                                    7.8 Update User's Balance
+
+                                                    
+<img width="941" height="464" alt="User_Update_Balance" src="https://github.com/user-attachments/assets/ec98bfe8-5f47-41bd-acc1-5a6169729f0d" />
+
+
+
+                                                      7.9 AppsFlyer Postback
+
+
+<img width="938" height="592" alt="AppsFlyer_Postback" src="https://github.com/user-attachments/assets/ae4833aa-6f0e-47a2-be60-817c4dd58a98" />
+
+
+
+
+
