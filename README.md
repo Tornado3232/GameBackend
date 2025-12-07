@@ -147,6 +147,29 @@ public class Event
 }
 ```
 
+
+4.3 IdempotencyRecord Model
+
+```bash
+public class IdempotencyRecord
+{
+    public int Id { get; set; }
+    public string Key { get; set; }
+    public string ResponseBody { get; set; }
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+}
+```
+
+4.4 AppsFlyer Model
+
+```bash
+public class AppsFlyer
+{
+    public int Id { get; set; }
+    public string Payload { get; set; }
+}
+```
+
 ------------------------------------------------------------
 5. Data Transfer Objects (DTOs)
 ------------------------------------------------------------
